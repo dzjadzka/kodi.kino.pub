@@ -18,9 +18,9 @@ List KinoPub API endpoints used and related auth/error handling based on resourc
 
 ## Acceptance Criteria
 <!-- AC:BEGIN -->
-- [ ] #1 backlog/docs/developer-guide/api-integration.md enumerates current KinoPub API calls (items, watching, bookmarks, collections, genres, user, device/notify, comments, similar, trailer, etc.) from resources/lib/main.py/client.py
-- [ ] #2 Documents auth headers/token usage and error handling approach in client.py
-- [ ] #3 Notes any rate limits, pagination, or request patterns relevant to contributors
+- [x] #1 backlog/docs/developer-guide/api-integration.md enumerates current KinoPub API calls (items, watching, bookmarks, collections, genres, user, device/notify, comments, similar, trailer, etc.) from resources/lib/main.py/client.py
+- [x] #2 Documents auth headers/token usage and error handling approach in client.py
+- [x] #3 Notes any rate limits, pagination, or request patterns relevant to contributors
 <!-- AC:END -->
 
 ## Implementation Notes
