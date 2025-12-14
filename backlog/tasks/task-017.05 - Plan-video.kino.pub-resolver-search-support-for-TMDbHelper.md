@@ -4,7 +4,7 @@ title: 'Plan: video.kino.pub resolver/search support for TMDbHelper'
 status: To Do
 assignee: []
 created_date: '2025-12-14 12:45'
-updated_date: '2025-12-14 13:00'
+updated_date: '2025-12-14 15:21'
 labels:
   - kodi
   - player
@@ -28,3 +28,9 @@ Plan concrete changes in video.kino.pub to support TMDbHelper playback without T
 - [ ] #3 Outline behavior when multiple matches/none found and what user sees (fallback to search listing)
 - [ ] #4 Produce short implementation notes (files to touch, caution on backward compatibility)
 <!-- AC:END -->
+
+## Implementation Notes
+
+<!-- SECTION:NOTES:BEGIN -->
+Added installer route /install_tmdbhelper_player/ in video.kino.pub to copy player JSON into TMDbHelper userdata without touching TMDbHelper code. Updated testing docs with RunPlugin instructions.
+<!-- SECTION:NOTES:END -->
