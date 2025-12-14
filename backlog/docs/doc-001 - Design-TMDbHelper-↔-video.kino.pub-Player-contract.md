@@ -3,46 +3,49 @@ id: doc-001
 title: 'Design: TMDbHelper ↔ video.kino.pub Player contract'
 type: other
 created_date: '2025-12-14 12:44'
+updated_date: '2025-12-14 13:00'
 ---
 # Design: TMDbHelper ↔ video.kino.pub Player contract
 
 ## TMDbHelper player system (plugin.video.themoviedb.helper)
-- Player definitions are JSON files under `resources/players/*.json` (bundled) plus user/overrides (`special://profile/addon_data/plugin.video.themoviedb.helper/players/`).
-- Keys: `name`, `plugin` (id), optional list `plugins`, `priority`, `provider`, `assert` (required fields to show player), `fallback`, `play_movie|play_episode|search_movie|search_episode` (step arrays), `is_resolvable`, `make_playlist`, `language` (translation lookup), `disabled`.
-- Step arrays combine plugin:// URLs and action maps: keyboard input, regex match on list items, return early when season/episode match, dialog handling. Examples: `netflix.json`, `composite_for_plex.json`, `jellycon.json`, `youtube.json`.
-- Input keys available for formatting (from Player-Function.md): `{tmdb}`, `{imdb}`, `{tvdb}`, `{trakt}`, `{slug}`, `{name}`, `{title}`, `{year}`, `{season}`, `{episode}`, `{showname}`, etc. TMDbHelper can supply tmdb/imdb/tvdb ids and show/episode numbers.
-- Player loading: `tmdbhelper.lib.player.config.files.PlayerFiles` aggregates JSON from bundled/user/saved dirs; `PlayerMeta` computes priority and checks addon enabled. Dialog selection uses `PlayerItems`/`PlayerDefault`, allows combined players and fallback chains. `is_resolvable` true => uses `setResolvedUrl` flow.
-- Playerstring (monitor/scrobbler) stores current playback metadata: tmdb_type, tmdb_id (or tvshow tmdb for episode), imdb_id, tvdb_id, season/episode.
+- Player definitions live in `resources/players/*.json` (bundled) plus user overrides at `special://profile/addon_data/plugin.video.themoviedb.helper/players/`.
+- Keys: `name`, `plugin` (or list of plugins), `priority`, `provider`, `assert`, `fallback`, `play_movie|play_episode|search_movie|search_episode` step arrays, `is_resolvable`, `make_playlist`, optional `language`, `disabled`.
+- Steps support plugin:// URLs and action maps (keyboard input, regex item match, early `return` on season/episode, dialog control). Examples: `netflix.json`, `composite_for_plex.json`, `jellycon.json`, `youtube.json`.
+- Available placeholders (Player-Function.md): `{tmdb}`, `{imdb}`, `{tvdb}`, `{trakt}`, `{slug}`, `{name}`, `{title}`, `{year}`, `{season}`, `{episode}`, `{showname}`, etc. TMDbHelper supplies tmdb/imdb/tvdb ids plus title/year/season/episode.
+- Loader: `tmdbhelper.lib.player.config.files.PlayerFiles` + `PlayerMeta` read JSON from bundled/user/saved dirs, verify addons enabled, compute priority. Dialog selection via `PlayerItems`/`PlayerDefault`; `is_resolvable=true` uses `setResolvedUrl` flow.
+- Playerstring (monitor/scrobbler) carries tmdb_type, tmdb_id/tvshow.tmdb, imdb_id, tvdb_id, season, episode.
 
-## Plugin video.kino.pub (P1) playback model
-- Navigation and routes in `src/resources/lib/main.py`; playback routes `plugin://video.kino.pub/play/<item_id>[?season_index=&index=]` for movies/episodes, trailer route `.../trailer/<item_id>`.
-- Item models in `src/resources/lib/modeling.py`: internal `item_id` from KinoPub API; episodes reuse show `item_id` with `season_index` and `index` params. Movies/episodes resolve via `ItemsCollection.get_playable` then `Player` (`player.py`) which uses `setResolvedUrl` and refreshes tokens.
-- Metadata includes imdb id (`imdbnumber`), ratings, titles, seasons/episodes, but there is **no external id entrypoint**: URLs use KinoPub internal ids, browsing/search flows hit KinoPub API via title-based search and listing endpoints (`main.py` headings/search`).
+## video.kino.pub (addon #1) playback model (current)
+- Routes in `src/resources/lib/main.py`.
+  - Playback: `plugin://video.kino.pub/play/<item_id>[?season_index=&index=]` → resolves via `ItemsCollection.get_playable` → `Player` (`src/resources/lib/player.py`) using `setResolvedUrl` (is_resolvable=true).
+  - Search (non-interactive): `plugin://video.kino.pub/search/<content_type>/results/?title=<q>`; content_type can be `movies`, `serials`, `all`, etc. Query params become `plugin.kwargs` and feed `ItemsCollection.get("items", data)`.
+  - Watching list: `/watching/`, etc. (not required for TMDbHelper).
+- Models in `src/resources/lib/modeling.py`: movies/episodes identified by KinoPub internal `id`. Episodes use the show `item_id` with `season_index` (1-based) and `index` (1-based episode within season). VideoInfoTag includes `imdbnumber` but no tmdb/tvdb ids.
+- No resolver for external ids (tmdb/imdb/tvdb). Matching must use title/year and KinoPub search.
 
-## Integration contract needs
-- TMDbHelper passes tmdb/imdb/tvdb ids, titles, year, season, episode to player JSON steps. To launch P1 directly, we need a plugin:// URL or script entry that can resolve to play a specific movie/episode using those fields.
-- Current P1 lacks endpoints to search by tmdb/imdb or direct playback by external id. It only plays by KinoPub `item_id` discovered via its own API/browse/search UI.
-- Potential integration options (to be validated):
-  - Add a new route to P1 that accepts imdb/tmdb/title params, performs KinoPub API search and resolves first/best match to internal id, then redirects to `/play/<id>`.
-  - Alternatively, define TMDbHelper player JSON to open P1 search UI and rely on regex matching, but need to confirm P1 exposes search via plugin:// parameters (currently only interactive search flow `/new_search/<content_type>/` with keyboard prompt).
-- is_resolvable: P1 uses `setResolvedUrl` once playback URL known; likely `is_resolvable=true` once proper resolver exists.
+## Historical notes (validated)
+- Discussion #203 routes confirmed: search via `/search/<type>/results/?title=...`; play via `/play/<id>?season_index=&index=` requires KinoPub `id` (see Aux doc doc-002).
+- Playback uses `setResolvedUrl`; TMDbHelper player can be `is_resolvable=true` once we supply deterministic routes.
 
-## Open questions / gaps
-1) Does KinoPub API expose search by imdb/tmdb ids? (not found in repo docs); if not, need strategy (title/year search or new API call).
-2) Can P1 accept query parameters to bypass on-screen keyboard for search? If not, need new route to accept query text for TMDbHelper automation.
-3) For episodes, how to map TMDbHelper season/episode numbers to KinoPub `season_index` and `index`? (assumes 1-based; confirm against API data format).
-4) Are there content type restrictions (movies vs serials vs tvshows) that affect search endpoints or paths (e.g., `/items/<type>/` requirements)?
-5) How should fallback behave when multiple matches returned (e.g., different releases or translations)? Define matching heuristic (title regex? year?).
+## Decisions (no open questions)
+1) **External ids**: Not supported in addon #1. Integration will match by title/year (movies) and by show title + season/episode (episodes). Documented; future external-id resolver optional but not required.
+2) **Search entrypoint**: Use existing non-interactive search route `/search/<content_type>/results/?title=...` with `content_type=movies` or `serials`. This avoids on-screen keyboard and is backward compatible.
+3) **Playback URLs**: Use existing `/play/<item_id>` (movies) and `/play/<item_id>?season_index=&index=` (episodes), 1-based indices. Player JSON will drill down via search results to reach the episode entry when needed.
+4) **is_resolvable**: Set to `true` in player JSON because addon #1 uses `setResolvedUrl`.
+5) **Fallback**: If direct match fails, fall back to search listing (search_movie/search_episode) so the user can choose; TMDbHelper dialog handles selection per standard behavior.
 
-## Findings for player schema examples
-- `netflix.json`: uses keyboard automation + regex matching on results; requires title/year or showname/season/episode.
-- `composite_for_plex.json`: uses query string search URL with title; asserts title+year for movies.
-- `jellycon.json`: simple search URL with title, optional fallback to parentid variant.
-- `youtube.json`: search via plugin URL with `{name_url}` / `{title}` keys; uses dialog as needed.
+## Target contract (to implement)
+- Player JSON (user-supplied) for TMDbHelper:
+  - `plugin`: `video.kino.pub`, `provider`: `kino.pub`, `priority`: moderate (e.g., 200).
+  - `assert`: movies require `title`+`year`; episodes require `showname`+`season`+`episode`.
+  - `play_movie`: open `plugin://video.kino.pub/search/movies/results/?title={title}&year={year}` then regex match on title/year to play.
+  - `play_episode`: open `plugin://video.kino.pub/search/serials/results/?title={showname}` then match show title, season, episode, following Netflix-style steps to open season and episode.
+  - `search_movie` / `search_episode`: same URLs without strict matching for fallback.
+  - `is_resolvable`: true.
+- No TMDbHelper changes required; player JSON to be placed in TMDbHelper user players directory (`special://profile/addon_data/plugin.video.themoviedb.helper/players/`) or shipped in this repo under `integrations/tmdbhelper/players/` for users to copy.
 
-## Candidate contract sketch (to be validated in tasks)
-- Player JSON for P1 likely needs `play_movie` URL like `plugin://video.kino.pub/search_play?title={title}&year={year}` if implemented; episodes `...&season={season}&episode={episode}&showname={showname}`.
-- Assert keys: start with `title/year` for movies; `showname/season/episode` for episodes.
-- Mark `is_resolvable` true once P1 resolver uses `setResolvedUrl`.
-
-This doc should be updated after spikes clarify API capabilities and route design.
+## Next steps alignment
+- Implement/stabilize non-interactive search usage and ensure search respects `title` param in addon #1 (minimal code touch, backward compatible).
+- Provide the user player JSON file and installation instructions.
+- Add regression-safe resolver/matching logic (title/year; season/episode) and document limitations (no external-id matching).
+- Create test checklist (movies/episodes, ambiguous titles, auth token refresh).
