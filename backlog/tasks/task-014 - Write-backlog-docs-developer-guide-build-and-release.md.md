@@ -18,9 +18,9 @@ Capture build/release process including Makefile targets (video_addon, repo_addo
 
 ## Acceptance Criteria
 <!-- AC:BEGIN -->
-- [ ] #1 backlog/docs/developer-guide/build-and-release.md lists Makefile targets (video_addon, repo_addon, repo, deploy) with when/how to use them
-- [ ] #2 Describes required env vars (VERSION, NETLIFY_AUTH_TOKEN, NETLIFY_SITE_ID) and how they affect builds/deploys
-- [ ] #3 Explains packaging inputs/outputs (src/addon.py/resources, repo_src assets) and expected artifacts
+- [x] #1 backlog/docs/developer-guide/build-and-release.md lists Makefile targets (video_addon, repo_addon, repo, deploy) with when/how to use them
+- [x] #2 Describes required env vars (VERSION, NETLIFY_AUTH_TOKEN, NETLIFY_SITE_ID) and how they affect builds/deploys
+- [x] #3 Explains packaging inputs/outputs (src/addon.py/resources, repo_src assets) and expected artifacts
 <!-- AC:END -->
 
 ## Implementation Notes
