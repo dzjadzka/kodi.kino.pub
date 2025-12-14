@@ -115,3 +115,4 @@ dmypy.json
 
 # builds
 *.zip
+!/backlog/drafts/kodi.log

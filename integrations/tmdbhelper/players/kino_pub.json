@@ -4,6 +4,8 @@
   "provider": "kino.pub",
   "priority": 200,
   "is_resolvable": "true",
+  "make_playlist": "true",
+  "language": "ru",
   "assert": {
     "play_movie": ["title", "year"],
     "play_episode": ["showname", "season", "episode"],
@@ -16,13 +18,15 @@
   },
   "play_movie": [
     "plugin://video.kino.pub/search/movies/results/?title={title_url}&year={year}",
-    {"title": "(?i).*{title}.*", "year": "{year}"}
+    {"title": "(?i).*(\\Q{title}\\E|\\Q{originaltitle}\\E|\\Q{ru_title}\\E).*", "year": "{year}"},
+    {"title": "(?i).*(\\Q{title}\\E|\\Q{originaltitle}\\E|\\Q{ru_title}\\E).*"}
   ],
   "play_episode": [
     "plugin://video.kino.pub/search/serials/results/?title={showname_url}",
-    {"title": "(?i).*{showname}.*"},
-    {"season": "{season}"},
+    {"title": "(?i).*(\\Q{showname}\\E|\\Q{ru_showname}\\E|\\Q{originaltitle}\\E).*"},
     {"return": "true", "season": "{season}", "episode": "{episode}"},
+    {"season": "{season}"},
+    {"return": "true", "season_number": "{season}", "video_number": "{episode}"},
     {"label": "(?i).*s0*{season}e0*{episode}.*"},
     {"title": "(?i).*s0*{season}e0*{episode}.*"}
   ],
