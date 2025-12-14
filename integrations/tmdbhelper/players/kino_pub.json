@@ -22,7 +22,7 @@
     "plugin://video.kino.pub/search/serials/results/?title={showname_url}",
     {"title": "(?i).*{showname}.*"},
     {"season": "{season}"},
-    {"episode": "{episode}"},
+    {"return": "true", "season": "{season}", "episode": "{episode}"},
     {"label": "(?i).*s0*{season}e0*{episode}.*"},
     {"title": "(?i).*s0*{season}e0*{episode}.*"}
   ],
