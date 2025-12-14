@@ -18,9 +18,9 @@ Outline playback/resume behavior, quality selection, trailer handling, and Trakt
 
 ## Acceptance Criteria
 <!-- AC:BEGIN -->
-- [ ] #1 backlog/docs/user-guide/playback.md describes playback start/resume logic and quality selection options from resources/lib/player.py
-- [ ] #2 Covers trailer handling and how Trakt scrobble properties are set (sources referenced in player.py/modeling.py)
-- [ ] #3 Includes notes on any user-facing settings that affect playback/resume behavior
+- [x] #1 backlog/docs/user-guide/playback.md describes playback start/resume logic and quality selection options from resources/lib/player.py
+- [x] #2 Covers trailer handling and how Trakt scrobble properties are set (sources referenced in player.py/modeling.py)
+- [x] #3 Includes notes on any user-facing settings that affect playback/resume behavior
 <!-- AC:END -->
 
 ## Implementation Notes
