@@ -4,7 +4,7 @@ title: Verify listitem season/episode metadata for TMDbHelper matching
 status: Done
 assignee: []
 created_date: '2025-12-14 15:05'
-updated_date: '2025-12-14 15:06'
+updated_date: '2025-12-14 16:57'
 labels:
   - kodi
   - player
@@ -32,4 +32,6 @@ Confirm video.kino.pub emits season/episode info in listitems (seasons and episo
 
 <!-- SECTION:NOTES:BEGIN -->
 Verified from code that Season/SeasonEpisode listitems set season/episode infolabels via video_info in src/resources/lib/modeling.py: Season.video_info includes "season"; SeasonEpisode.video_info includes "season" and "episode", tvshowtitle, duration, playcount. ExtendedListItem calls setInfo("video", video_info), so TMDbHelper matching can use season/episode. No code changes needed; decision recorded in doc-001.
+
+Confirmed season/episode metadata was sufficient; issue was player step order, now fixed with early return, as seen in 17:34 log.
 <!-- SECTION:NOTES:END -->
