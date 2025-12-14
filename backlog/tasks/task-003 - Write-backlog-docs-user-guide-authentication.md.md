@@ -18,9 +18,9 @@ Document device-code login and token refresh behavior using resources/lib/auth.p
 
 ## Acceptance Criteria
 <!-- AC:BEGIN -->
-- [ ] #1 backlog/docs/user-guide/authentication.md explains device-code flow steps and user prompts based on resources/lib/auth.py
-- [ ] #2 Token refresh behavior and persistence are described with references to the relevant functions
-- [ ] #3 Document links to /login route handling in resources/lib/main.py for navigation context
+- [x] #1 backlog/docs/user-guide/authentication.md explains device-code flow steps and user prompts based on resources/lib/auth.py
+- [x] #2 Token refresh behavior and persistence are described with references to the relevant functions
+- [x] #3 Document links to /login route handling in resources/lib/main.py for navigation context
 <!-- AC:END -->
 
 ## Implementation Notes
