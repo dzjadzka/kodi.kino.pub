@@ -18,9 +18,9 @@ Document search UI behavior and history persistence using resources/lib/search_h
 
 ## Acceptance Criteria
 <!-- AC:BEGIN -->
-- [ ] #1 backlog/docs/user-guide/search-and-history.md explains search entry points/routes in resources/lib/main.py
-- [ ] #2 Describes how search history is stored/limited/cleared based on resources/lib/search_history.py
-- [ ] #3 Includes user-facing guidance for recalling or deleting past searches
+- [x] #1 backlog/docs/user-guide/search-and-history.md explains search entry points/routes in resources/lib/main.py
+- [x] #2 Describes how search history is stored/limited/cleared based on resources/lib/search_history.py
+- [x] #3 Includes user-facing guidance for recalling or deleting past searches
 <!-- AC:END -->
 
 ## Implementation Notes
