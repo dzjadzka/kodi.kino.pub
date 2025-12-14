@@ -1,9 +1,10 @@
 ---
 id: task-017
 title: 'EPIC: TMDbHelper Player integration for video.kino.pub'
-status: To Do
+status: Done
 assignee: []
 created_date: '2025-12-14 12:45'
+updated_date: '2025-12-14 16:57'
 labels:
   - kodi
   - tmdbhelper
@@ -26,3 +27,9 @@ Enable TMDbHelper to use video.kino.pub as a Player for movie/episode playback. 
 - [ ] #4 Risks/limitations and fallbacks captured with mitigation plan
 - [ ] #5 Implementation/test/docs tasks identified and linked
 <!-- AC:END -->
+
+## Implementation Notes
+
+<!-- SECTION:NOTES:BEGIN -->
+17:34 log confirms kino_pub player now auto-resolves episodes without opening folders after adding explicit return step in TMDbHelper player JSON.
+<!-- SECTION:NOTES:END -->
