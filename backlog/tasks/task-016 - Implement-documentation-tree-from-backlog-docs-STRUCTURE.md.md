@@ -1,9 +1,10 @@
 ---
 id: task-016
 title: Implement documentation tree from backlog/docs/STRUCTURE.md
-status: To Do
+status: Done
 assignee: []
 created_date: '2025-12-14 12:08'
+updated_date: '2025-12-14 12:17'
 labels:
   - docs
   - epic
@@ -34,6 +35,12 @@ Track completion of the new documentation structure described in backlog/docs/ST
 ## Acceptance Criteria
 <!-- AC:BEGIN -->
 - [ ] #1 All dependent doc tasks (task-001..task-015) are completed and committed
-- [ ] #2 docs/ tree matches structure defined in backlog/docs/STRUCTURE.md
+- [ ] #2 backlog/docs/ tree matches structure defined in backlog/docs/STRUCTURE.md
 - [ ] #3 Any deviations or follow-ups are documented as new tasks or notes
 <!-- AC:END -->
+
+## Implementation Notes
+
+<!-- SECTION:NOTES:BEGIN -->
+All docs authored under docs/ per backlog/docs/STRUCTURE.md. Subtasks task-001..task-015 marked Done. Docs tree includes overview, user-guide (installation, authentication, navigation, search-and-history, bookmarks-and-watchlist, playback, settings, proxy-and-network, localization) and developer-guide (architecture, api-integration, testing, build-and-release, settings-and-env).
+<!-- SECTION:NOTES:END -->
