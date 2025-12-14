@@ -18,9 +18,9 @@ Outline addon entrypoint, routing system, plugin orchestration, models/entities,
 
 ## Acceptance Criteria
 <!-- AC:BEGIN -->
-- [ ] #1 backlog/docs/developer-guide/architecture.md describes entrypoint flow from src/addon.py into routing/plugin stack
-- [ ] #2 Explains routing system (resources/lib/routing.py) and how Plugin orchestrates routes/actions (resources/lib/plugin.py)
-- [ ] #3 Summarizes key models/entities (resources/lib/modeling.py) and helper modules (utils, listitem, logger) with relationships
+- [x] #1 backlog/docs/developer-guide/architecture.md describes entrypoint flow from src/addon.py into routing/plugin stack
+- [x] #2 Explains routing system (resources/lib/routing.py) and how Plugin orchestrates routes/actions (resources/lib/plugin.py)
+- [x] #3 Summarizes key models/entities (resources/lib/modeling.py) and helper modules (utils, listitem, logger) with relationships
 <!-- AC:END -->
 
 ## Implementation Notes
