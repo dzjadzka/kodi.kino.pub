@@ -18,9 +18,9 @@ Explain KINO_PUB_TEST flag impact on Settings.api_url and Logger configuration u
 
 ## Acceptance Criteria
 <!-- AC:BEGIN -->
-- [ ] #1 backlog/docs/developer-guide/settings-and-env.md describes KINO_PUB_TEST flag behavior and default values
-- [ ] #2 Details how the flag affects Settings.api_url selection and logger configuration from resources/lib/settings.py and resources/lib/logger.py
-- [ ] #3 Provides guidance on when to use the flag in development vs production
+- [x] #1 backlog/docs/developer-guide/settings-and-env.md describes KINO_PUB_TEST flag behavior and default values
+- [x] #2 Details how the flag affects Settings.api_url selection and logger configuration from resources/lib/settings.py and resources/lib/logger.py
+- [x] #3 Provides guidance on when to use the flag in development vs production
 <!-- AC:END -->
 
 ## Implementation Notes
