@@ -10,6 +10,7 @@ import xbmcaddon
 import xbmcgui
 import xbmcplugin
 import xbmcvfs
+import os
 
 from resources.lib.modeling import ItemEntity
 from resources.lib.modeling import Multi
@@ -579,10 +580,13 @@ def install_tmdbhelper_player() -> None:
     src = xbmcvfs.translatePath(
         "special://home/addons/video.kino.pub/integrations/tmdbhelper/players/kino_pub.json"
     )
+    if not xbmcvfs.exists(src):
+        xbmc.log("[video.kino.pub] TMDbHelper player json source missing", xbmc.LOGWARNING)
+        return
     dst_dir = xbmcvfs.translatePath(
         "special://profile/addon_data/plugin.video.themoviedb.helper/players/"
     )
-    dst = f"{dst_dir}kino_pub.json"
+    dst = os.path.join(dst_dir, "kino_pub.json")
     ok = xbmcvfs.mkdirs(dst_dir)
     ok = ok and xbmcvfs.copy(src, dst)
     dialog = xbmcgui.Dialog()
