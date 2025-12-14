@@ -9,6 +9,7 @@ import xbmc
 import xbmcaddon
 import xbmcgui
 import xbmcplugin
+import xbmcvfs
 
 from resources.lib.modeling import ItemEntity
 from resources.lib.modeling import Multi
@@ -542,3 +543,22 @@ def install_inputstream_helper() -> None:
 @plugin.routing.route("/inputstream_adaptive_settings/")
 def inputstream_adaptive_settings() -> None:
     xbmcaddon.Addon("inputstream.adaptive").openSettings()
+
+
+@plugin.routing.route("/install_tmdbhelper_player/")
+def install_tmdbhelper_player() -> None:
+    """Copy TMDbHelper player JSON into TMDbHelper userdata for easy installation."""
+    src = xbmcvfs.translatePath(
+        "special://home/addons/video.kino.pub/integrations/tmdbhelper/players/kino_pub.json"
+    )
+    dst_dir = xbmcvfs.translatePath(
+        "special://profile/addon_data/plugin.video.themoviedb.helper/players/"
+    )
+    dst = f"{dst_dir}kino_pub.json"
+    ok = xbmcvfs.mkdirs(dst_dir)
+    ok = ok and xbmcvfs.copy(src, dst)
+    dialog = xbmcgui.Dialog()
+    if ok:
+        dialog.notification("kino.pub", "TMDbHelper player installed", xbmcgui.NOTIFICATION_INFO, 5000)
+    else:
+        dialog.notification("kino.pub", "Failed to install TMDbHelper player", xbmcgui.NOTIFICATION_ERROR, 5000)

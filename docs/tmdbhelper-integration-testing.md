@@ -1,7 +1,8 @@
 # TMDbHelper ↔ video.kino.pub integration testing
 
 ## Install player JSON
-- Copy `integrations/tmdbhelper/players/kino_pub.json` to `special://profile/addon_data/plugin.video.themoviedb.helper/players/` (Kodi profile).
+- Option A: Run `RunPlugin(plugin://video.kino.pub/install_tmdbhelper_player/)` (copies bundled JSON into `special://profile/addon_data/plugin.video.themoviedb.helper/players/`).
+- Option B: Manually copy `integrations/tmdbhelper/players/kino_pub.json` to `special://profile/addon_data/plugin.video.themoviedb.helper/players/`.
 - Ensure `video.kino.pub` add-on is installed and authorized (device code login).
 
 ## Expected play flow (episodes)
