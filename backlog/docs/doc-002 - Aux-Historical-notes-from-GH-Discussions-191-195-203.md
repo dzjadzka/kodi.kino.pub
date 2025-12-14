@@ -3,22 +3,18 @@ id: doc-002
 title: 'Aux: Historical notes from GH Discussions (#191/#195/#203)'
 type: other
 created_date: '2025-12-14 12:59'
+updated_date: '2025-12-14 16:58'
 ---
 # Aux: Historical notes from GH Discussions (#191/#195/#203)
 
-## Discussion #191 (watching / Container.Update / RunAddon)
-- Claim: playback could be triggered via `plugin://video.kino.pub/watching/` or `Container.Update`/`RunAddon` flows.
-- Status: VERIFIED. Current code has route `/watching/` in `src/resources/lib/main.py` (lists in-progress TV shows). Playbacks still go through `setResolvedUrl` in `main.py` → `Player`.
+Status of historical points (verified/changed/removed):
+- VERIFIED: `plugin://video.kino.pub/search/serials/results?title=...` works (see current search route and logs).
+- VERIFIED: `plugin://video.kino.pub/play/<id>?season_index=&index=` works with 1-based season/index; used by current player JSON, confirmed in 17:34 log (play/15419?season_index=1&index=1).
+- VERIFIED: `watching` endpoint exists (`/watching?id=<id>`), used internally; route still present.
+- CHANGED: Episode auto-select now uses season_episodes + play with return step in player JSON; TMDbHelper integration confirmed working in 17:34 log.
+- REMOVED: Earlier assumption about needing Container.Update/runplugin for playback; current approach relies on setResolvedUrl.
 
-## Discussion #195 (library integration request)
-- Claim: maintainer wasn’t planning to implement library integration; expectation is community-driven changes.
-- Status: VERIFIED (contextual). Matches current scope: no library/TMDbHelper integration present; we must add integration on addon #1 side only.
-
-## Discussion #203 (search/play plugin URLs needing KinoPub REST id)
-- Claim: plugin:// routes usable:
-  - search: `plugin://video.kino.pub/search/<type>/results/?title=<name>`
-  - play: `plugin://video.kino.pub/play/<id>?season_index=<num>&index=<num>`; requires KinoPub internal `id`.
-- Status: VERIFIED. Current routes in `src/resources/lib/main.py`:
-  - `/search/<content_type>/results/` consumes query params (`title` etc.) via `plugin.kwargs` and calls ItemsCollection search.
-  - `/play/<item_id>` accepts optional `season_index` and `index` (1-based) and resolves playback via `ItemsCollection.get_playable` + `Player` using `setResolvedUrl`.
-- Note: No external-id (tmdb/imdb) resolver exists; integration must resolve to KinoPub `id` via search/matching.
+References to current code/logs:
+- Routes: `src/resources/lib/main.py` (`/search/...`, `/seasons/<id>/`, `/season_episodes/<id>/<season>/`, `/play/<id>`)
+- Metadata: `src/resources/lib/modeling.py` (Season/SeasonEpisode video_info)
+- Log confirmation: 2025-12-14 17:34 session shows direct episode playback after season/episode match.
