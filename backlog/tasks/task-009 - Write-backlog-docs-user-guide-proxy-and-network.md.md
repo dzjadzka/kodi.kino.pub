@@ -18,9 +18,9 @@ Describe system proxy usage and validation from resources/lib/xbmc_settings.py a
 
 ## Acceptance Criteria
 <!-- AC:BEGIN -->
-- [ ] #1 backlog/docs/user-guide/proxy-and-network.md explains how proxy settings are read from system/Kodi via resources/lib/xbmc_settings.py
-- [ ] #2 Covers validation/error handling and how client requests use proxy settings in resources/lib/client.py
-- [ ] #3 Includes user guidance for enabling/disabling proxy and troubleshooting common failures
+- [x] #1 backlog/docs/user-guide/proxy-and-network.md explains how proxy settings are read from system/Kodi via resources/lib/xbmc_settings.py
+- [x] #2 Covers validation/error handling and how client requests use proxy settings in resources/lib/client.py
+- [x] #3 Includes user guidance for enabling/disabling proxy and troubleshooting common failures
 <!-- AC:END -->
 
 ## Implementation Notes
