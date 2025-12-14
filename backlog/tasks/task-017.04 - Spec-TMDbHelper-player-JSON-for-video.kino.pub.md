@@ -1,10 +1,10 @@
 ---
 id: task-017.04
 title: 'Spec: TMDbHelper player JSON for video.kino.pub'
-status: To Do
+status: Done
 assignee: []
 created_date: '2025-12-14 12:45'
-updated_date: '2025-12-14 13:00'
+updated_date: '2025-12-14 16:57'
 labels:
   - kodi
   - tmdbhelper
@@ -28,3 +28,9 @@ Draft user player JSON for TMDbHelper to call video.kino.pub using the agreed co
 - [ ] #3 Steps use non-interactive URLs `/search/movies/results/?title={title}&year={year}` and `/search/serials/results/?title={showname}` with regex matching and season/episode traversal; fallback search entries provided
 - [ ] #4 Notes include install path (`special://profile/addon_data/plugin.video.themoviedb.helper/players/`) and any limitations (no external-id lookup)
 <!-- AC:END -->
+
+## Implementation Notes
+
+<!-- SECTION:NOTES:BEGIN -->
+Player JSON finalized with sequential season→episode steps and early return when season/episode match; tested in 17:34 log: TMDbHelper resolves episode without opening folders.
+<!-- SECTION:NOTES:END -->
