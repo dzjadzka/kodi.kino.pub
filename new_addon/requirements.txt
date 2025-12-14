@@ -1,0 +1,2 @@
+# Runtime dependencies
+# Note: Kodi modules (xbmc, xbmcgui, xbmcaddon, etc.) are provided by Kodi runtime
