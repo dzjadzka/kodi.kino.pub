@@ -1,0 +1,30 @@
+{
+  "name": "KinoPub",
+  "plugin": "video.kino.pub",
+  "provider": "kino.pub",
+  "priority": 200,
+  "is_resolvable": "true",
+  "assert": {
+    "play_movie": ["title", "year"],
+    "play_episode": ["showname", "season", "episode"],
+    "search_movie": ["title"],
+    "search_episode": ["showname"]
+  },
+  "fallback": {
+    "play_movie": "kino_pub.json search_movie",
+    "play_episode": "kino_pub.json search_episode"
+  },
+  "play_movie": [
+    "plugin://video.kino.pub/search/movies/results/?title={title_url}&year={year}",
+    {"title": "(?i).*{title}.*", "year": "{year}"}
+  ],
+  "play_episode": [
+    "plugin://video.kino.pub/search/serials/results/?title={showname_url}",
+    {"title": "(?i).*{showname}.*"},
+    {"season": "{season}"},
+    {"season": "{season}", "episode": "{episode}"},
+    {"title": "(?i).*s0*{season}e0*{episode}.*"}
+  ],
+  "search_movie": "plugin://video.kino.pub/search/movies/results/?title={title_url}",
+  "search_episode": "plugin://video.kino.pub/search/serials/results/?title={showname_url}"
+}
