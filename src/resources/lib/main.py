@@ -17,6 +17,8 @@ from resources.lib.modeling import Multi
 from resources.lib.modeling import TVShow
 from resources.lib.player import Player
 from resources.lib.plugin import Plugin
+from resources.lib.tmdbhelper_installer import ensure_tmdbhelper_player_installed
+from resources.lib.tmdbhelper_installer import install_tmdbhelper_player
 from resources.lib.utils import localize
 from resources.lib.utils import popup_info
 
@@ -34,31 +36,6 @@ content_type_map = {
 
 
 plugin = Plugin()
-_player_json_checked = False
-
-
-def ensure_tmdbhelper_player_installed() -> None:
-    global _player_json_checked
-    if _player_json_checked:
-        return
-    _player_json_checked = True
-    dst_dir = xbmcvfs.translatePath(
-        "special://profile/addon_data/plugin.video.themoviedb.helper/players/"
-    )
-    dst = f"{dst_dir}kino_pub.json"
-    if xbmcvfs.exists(dst):
-        return
-    src = xbmcvfs.translatePath(
-        "special://home/addons/video.kino.pub/integrations/tmdbhelper/players/kino_pub.json"
-    )
-    if not xbmcvfs.exists(src):
-        xbmc.log("[video.kino.pub] TMDbHelper player json source missing", xbmc.LOGWARNING)
-        return
-    ok = xbmcvfs.mkdirs(dst_dir) and xbmcvfs.copy(src, dst)
-    if ok:
-        xbmc.log("[video.kino.pub] Installed TMDbHelper player json into userdata", xbmc.LOGINFO)
-    else:
-        xbmc.log("[video.kino.pub] Failed to install TMDbHelper player json", xbmc.LOGERROR)
 
 
 def render_pagination(pagination: Optional[Dict[str, Any]]) -> None:
@@ -577,18 +554,7 @@ def inputstream_adaptive_settings() -> None:
 @plugin.routing.route("/install_tmdbhelper_player/")
 def install_tmdbhelper_player() -> None:
     """Copy TMDbHelper player JSON into TMDbHelper userdata for easy installation."""
-    src = xbmcvfs.translatePath(
-        "special://home/addons/video.kino.pub/integrations/tmdbhelper/players/kino_pub.json"
-    )
-    if not xbmcvfs.exists(src):
-        xbmc.log("[video.kino.pub] TMDbHelper player json source missing", xbmc.LOGWARNING)
-        return
-    dst_dir = xbmcvfs.translatePath(
-        "special://profile/addon_data/plugin.video.themoviedb.helper/players/"
-    )
-    dst = os.path.join(dst_dir, "kino_pub.json")
-    ok = xbmcvfs.mkdirs(dst_dir)
-    ok = ok and xbmcvfs.copy(src, dst)
+    ok = install_tmdbhelper_player(force=True)
     dialog = xbmcgui.Dialog()
     if ok:
         dialog.notification("kino.pub", "TMDbHelper player installed", xbmcgui.NOTIFICATION_INFO, 5000)
