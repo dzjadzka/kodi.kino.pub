@@ -4,6 +4,7 @@ title: 'Spec: TMDbHelper player JSON for video.kino.pub'
 status: To Do
 assignee: []
 created_date: '2025-12-14 12:45'
+updated_date: '2025-12-14 13:00'
 labels:
   - kodi
   - tmdbhelper
@@ -17,13 +18,13 @@ parent_task_id: task-017
 ## Description
 
 <!-- SECTION:DESCRIPTION:BEGIN -->
-Draft the TMDbHelper player JSON definition for video.kino.pub including assert keys, play/search steps, resolvable flag, provider/priority, and any fallback behavior. Ready for future implementation once resolver routes are available.
+Draft user player JSON for TMDbHelper to call video.kino.pub using the agreed contract. Store JSON in repo (e.g., integrations/tmdbhelper/players/kino_pub.json) for users to copy into TMDbHelper userdata; no TMDbHelper code changes.
 <!-- SECTION:DESCRIPTION:END -->
 
 ## Acceptance Criteria
 <!-- AC:BEGIN -->
-- [ ] #1 JSON skeleton written and stored in notes/doc with fields filled (name, plugin id video.kino.pub, priority/provider, assert, play_movie/play_episode/search variants, is_resolvable)
-- [ ] #2 Steps align with agreed contract (parameters for movie and episode) and avoid unsupported flows (e.g., no interactive keyboard if route supports query params)
-- [ ] #3 Fallback behavior defined (e.g., switch to search mode if direct resolve fails)
-- [ ] #4 Open issues (e.g., missing resolver route) explicitly called out
+- [ ] #1 Player JSON written with plugin id video.kino.pub, provider kino.pub, priority (~200), is_resolvable=true
+- [ ] #2 Asserts set: play_movie requires title+year; play_episode requires showname+season+episode; search variants use title/showname
+- [ ] #3 Steps use non-interactive URLs `/search/movies/results/?title={title}&year={year}` and `/search/serials/results/?title={showname}` with regex matching and season/episode traversal; fallback search entries provided
+- [ ] #4 Notes include install path (`special://profile/addon_data/plugin.video.themoviedb.helper/players/`) and any limitations (no external-id lookup)
 <!-- AC:END -->
