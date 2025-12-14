@@ -18,9 +18,9 @@ Create backlog/docs/user-guide/installation.md restructuring install instruction
 
 ## Acceptance Criteria
 <!-- AC:BEGIN -->
-- [ ] #1 backlog/docs/user-guide/installation.md includes repository ZIP add-on path and manual release ZIP steps derived from README.md
-- [ ] #2 Instructions are reorganized for clarity (prereqs, steps, verification) without losing detail from README.md
-- [ ] #3 Notes mention the source section(s) in README.md for future updates
+- [x] #1 backlog/docs/user-guide/installation.md includes repository ZIP add-on path and manual release ZIP steps derived from README.md
+- [x] #2 Instructions are reorganized for clarity (prereqs, steps, verification) without losing detail from README.md
+- [x] #3 Notes mention the source section(s) in README.md for future updates
 <!-- AC:END -->
 
 ## Implementation Notes
