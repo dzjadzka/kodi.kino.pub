@@ -41,7 +41,7 @@ Document all entry points, route definitions, and URL patterns used by the addon
 5. Create route mapping table with path patterns, handlers, and parameters
 
 **Acceptance Criteria:**
-- [ ] Complete list of all 30+ routes with patterns documented
+- [ ] Complete list of all 34 routes with patterns documented
 - [ ] Route parameter types and validation rules documented
 - [ ] URL building logic (build_url, build_icon_path) documented
 - [ ] Query parameter handling documented
@@ -152,7 +152,7 @@ Complete inventory of all kino.pub API endpoints used by the addon.
 6. Group endpoints by functional area
 
 **Acceptance Criteria:**
-- [ ] Complete list of 20+ API endpoints documented
+- [ ] Complete list of at least 25 API endpoints documented (19 direct + items/* variants + collections/* variants)
 - [ ] Request methods (GET/POST) identified for each endpoint
 - [ ] Query parameters and request bodies documented
 - [ ] Endpoint categorization (auth, items, watching, bookmarks, collections, etc.)
@@ -467,7 +467,7 @@ Finalize routes.md with complete route specifications.
 6. Document special routes (login, reset_auth, play, trailer)
 
 **Acceptance Criteria:**
-- [ ] All 30+ routes documented with patterns
+- [ ] All 34 routes documented with patterns
 - [ ] Parameters (path, query) documented for each route
 - [ ] Route purposes and triggers documented
 - [ ] Navigation flow between routes documented
@@ -611,7 +611,7 @@ Scaffold router module with all route definitions.
 
 **Acceptance Criteria:**
 - [ ] Router module created with package structure
-- [ ] All 30+ route handlers stubbed
+- [ ] All 34 route handlers stubbed
 - [ ] Route registration mechanism implemented
 - [ ] URL builder utility created
 - [ ] Parameter validation interface defined
@@ -641,7 +641,7 @@ Scaffold API client module with all endpoint methods.
 **Acceptance Criteria:**
 - [ ] API client module created with package structure
 - [ ] HTTP client abstraction defined
-- [ ] All 20+ endpoint methods stubbed
+- [ ] All 25+ endpoint methods stubbed (covering items/*, bookmarks/*, watching/*, collections/*, etc.)
 - [ ] Authentication mechanism stubbed
 - [ ] Request/response models defined
 - [ ] Error handler stubs created
