@@ -34,9 +34,9 @@ Track completion of the new documentation structure described in backlog/docs/ST
 
 ## Acceptance Criteria
 <!-- AC:BEGIN -->
-- [ ] #1 All dependent doc tasks (task-001..task-015) are completed and committed
-- [ ] #2 backlog/docs/ tree matches structure defined in backlog/docs/STRUCTURE.md
-- [ ] #3 Any deviations or follow-ups are documented as new tasks or notes
+- [x] #1 All dependent doc tasks (task-001..task-015) are completed and committed
+- [x] #2 backlog/docs/ tree matches structure defined in backlog/docs/STRUCTURE.md
+- [x] #3 Any deviations or follow-ups are documented as new tasks or notes
 <!-- AC:END -->
 
 ## Implementation Notes
