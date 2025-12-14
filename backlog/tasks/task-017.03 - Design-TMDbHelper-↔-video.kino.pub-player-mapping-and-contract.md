@@ -4,6 +4,7 @@ title: 'Design: TMDbHelper ↔ video.kino.pub player mapping and contract'
 status: To Do
 assignee: []
 created_date: '2025-12-14 12:45'
+updated_date: '2025-12-14 13:00'
 labels:
   - kodi
   - tmdbhelper
@@ -18,13 +19,13 @@ parent_task_id: task-017
 ## Description
 
 <!-- SECTION:DESCRIPTION:BEGIN -->
-Propose the player contract between TMDbHelper and video.kino.pub: required asserts/keys, URL schema or route additions for direct play/search, matching rules for movie vs episode, and fallback/ambiguity handling. Align with Design doc doc-001.
+Finalize player contract between TMDbHelper and video.kino.pub using existing routes. Define asserts, URL schema, matching rules, and fallback behavior per doc-001 decisions; no TMDbHelper changes.
 <!-- SECTION:DESCRIPTION:END -->
 
 ## Acceptance Criteria
 <!-- AC:BEGIN -->
-- [ ] #1 Contract doc updated (doc-001) with concrete URL/route proposal for movie and episode playback and expected parameters
-- [ ] #2 Defines assert keys and TMDbHelper step flow (play vs search) for the new player JSON
-- [ ] #3 Outlines matching heuristics (title/year, season/episode) and ambiguity fallback behavior
-- [ ] #4 Lists open questions and decisions needed from API capabilities and validates dependencies
+- [ ] #1 Doc-001 updated with finalized contract (URLs, asserts, is_resolvable=true, matching rules) and decisions (no external-id support; title/year and season/episode matching)
+- [ ] #2 Defines play_movie/play_episode/search flows using `/search/<type>/results/?title=` and `/play/<id>[?season_index=&index=]` with 1-based indices
+- [ ] #3 Fallback behavior documented (search listing if match fails) and ambiguity handling defined
+- [ ] #4 No open questions remain; references to code files included
 <!-- AC:END -->
