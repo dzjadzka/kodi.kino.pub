@@ -18,9 +18,9 @@ Describe main menu entries and user flows using Plugin._main_menu_items in resou
 
 ## Acceptance Criteria
 <!-- AC:BEGIN -->
-- [ ] #1 backlog/docs/user-guide/navigation.md lists main menu items sourced from Plugin._main_menu_items
-- [ ] #2 Each menu entry notes the downstream routes/flows in resources/lib/main.py (search, fresh/hot/popular, collections, TV, bookmarks, watching, items/<type>)
-- [ ] #3 Doc includes brief usage examples or expected UI outcomes for key routes
+- [x] #1 backlog/docs/user-guide/navigation.md lists main menu items sourced from Plugin._main_menu_items
+- [x] #2 Each menu entry notes the downstream routes/flows in resources/lib/main.py (search, fresh/hot/popular, collections, TV, bookmarks, watching, items/<type>)
+- [x] #3 Doc includes brief usage examples or expected UI outcomes for key routes
 <!-- AC:END -->
 
 ## Implementation Notes
