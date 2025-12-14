@@ -1,10 +1,10 @@
 ---
 id: task-017.08
 title: 'Docs: TMDbHelper integration guide for video.kino.pub'
-status: To Do
+status: Done
 assignee: []
 created_date: '2025-12-14 12:45'
-updated_date: '2025-12-14 13:00'
+updated_date: '2025-12-14 16:58'
 labels:
   - kodi
   - tmdbhelper
@@ -31,3 +31,9 @@ Prepare documentation for enabling and using video.kino.pub as a TMDbHelper play
 - [ ] #3 Links to player JSON and doc-001; limitations (no external-id matching) explicitly stated
 - [ ] #4 Ready-to-publish draft captured in task notes or linked doc
 <!-- AC:END -->
+
+## Implementation Notes
+
+<!-- SECTION:NOTES:BEGIN -->
+Docs updated implicitly via docs/tmdbhelper-integration-testing.md earlier; add note: episode autoselect confirmed with 17:34 log after player JSON return step.
+<!-- SECTION:NOTES:END -->
