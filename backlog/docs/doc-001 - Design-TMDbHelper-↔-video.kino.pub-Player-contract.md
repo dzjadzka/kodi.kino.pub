@@ -3,7 +3,7 @@ id: doc-001
 title: 'Design: TMDbHelper ↔ video.kino.pub Player contract'
 type: other
 created_date: '2025-12-14 12:44'
-updated_date: '2025-12-14 13:00'
+updated_date: '2025-12-14 15:05'
 ---
 # Design: TMDbHelper ↔ video.kino.pub Player contract
 
@@ -20,7 +20,7 @@ updated_date: '2025-12-14 13:00'
   - Playback: `plugin://video.kino.pub/play/<item_id>[?season_index=&index=]` → resolves via `ItemsCollection.get_playable` → `Player` (`src/resources/lib/player.py`) using `setResolvedUrl` (is_resolvable=true).
   - Search (non-interactive): `plugin://video.kino.pub/search/<content_type>/results/?title=<q>`; content_type can be `movies`, `serials`, `all`, etc. Query params become `plugin.kwargs` and feed `ItemsCollection.get("items", data)`.
   - Watching list: `/watching/`, etc. (not required for TMDbHelper).
-- Models in `src/resources/lib/modeling.py`: movies/episodes identified by KinoPub internal `id`. Episodes use the show `item_id` with `season_index` (1-based) and `index` (1-based episode within season). VideoInfoTag includes `imdbnumber` but no tmdb/tvdb ids.
+- Models in `src/resources/lib/modeling.py`: movies/episodes identified by KinoPub internal `id`. Episodes use the show `item_id` with `season_index` (1-based) and `index` (1-based episode within season). VideoInfoTag includes `season`, `episode`, `tvshowtitle`, `imdbnumber`; no tmdb/tvdb ids.
 - No resolver for external ids (tmdb/imdb/tvdb). Matching must use title/year and KinoPub search.
 
 ## Historical notes (validated)
@@ -28,24 +28,24 @@ updated_date: '2025-12-14 13:00'
 - Playback uses `setResolvedUrl`; TMDbHelper player can be `is_resolvable=true` once we supply deterministic routes.
 
 ## Decisions (no open questions)
-1) **External ids**: Not supported in addon #1. Integration will match by title/year (movies) and by show title + season/episode (episodes). Documented; future external-id resolver optional but not required.
-2) **Search entrypoint**: Use existing non-interactive search route `/search/<content_type>/results/?title=...` with `content_type=movies` or `serials`. This avoids on-screen keyboard and is backward compatible.
-3) **Playback URLs**: Use existing `/play/<item_id>` (movies) and `/play/<item_id>?season_index=&index=` (episodes), 1-based indices. Player JSON will drill down via search results to reach the episode entry when needed.
+1) **External ids**: Not supported in addon #1. Integration uses title/year (movies) and show title + season/episode (episodes). Future external-id resolver optional.
+2) **Search entrypoint**: Use existing non-interactive search route `/search/<content_type>/results/?title=...` with `content_type=movies` or `serials`. URL-encode titles (`{title_url}`, `{showname_url}`) to avoid keyboard prompts.
+3) **Playback URLs**: Use existing `/play/<item_id>` (movies) and `/play/<item_id>?season_index=&index=` (episodes), 1-based indices. Player JSON drills down via search results to reach season/episode entries.
 4) **is_resolvable**: Set to `true` in player JSON because addon #1 uses `setResolvedUrl`.
-5) **Fallback**: If direct match fails, fall back to search listing (search_movie/search_episode) so the user can choose; TMDbHelper dialog handles selection per standard behavior.
+5) **Fallback**: If matching fails at any step, fall back to search listing so the user can pick manually; movies unaffected.
+6) **Metadata requirement**: Season/episode listitems must expose `season` and `episode` infolabels (already set in `modeling.py` video_info). TMDbHelper matches on these values during navigation.
 
-## Target contract (to implement)
+## Target contract (implemented for player JSON)
 - Player JSON (user-supplied) for TMDbHelper:
-  - `plugin`: `video.kino.pub`, `provider`: `kino.pub`, `priority`: moderate (e.g., 200).
+  - `plugin`: `video.kino.pub`, `provider`: `kino.pub`, `priority`: ~200.
   - `assert`: movies require `title`+`year`; episodes require `showname`+`season`+`episode`.
-  - `play_movie`: open `plugin://video.kino.pub/search/movies/results/?title={title}&year={year}` then regex match on title/year to play.
-  - `play_episode`: open `plugin://video.kino.pub/search/serials/results/?title={showname}` then match show title, season, episode, following Netflix-style steps to open season and episode.
-  - `search_movie` / `search_episode`: same URLs without strict matching for fallback.
+  - `play_movie`: `plugin://video.kino.pub/search/movies/results/?title={title_url}&year={year}` → regex match on title/year.
+  - `play_episode`: `plugin://video.kino.pub/search/serials/results/?title={showname_url}` → match show title → match season `{season}` → match episode `{episode}` (and regex `s0*{season}e0*{episode}` as fallback) → play.
+  - `search_movie` / `search_episode`: same URLs (encoded) without strict matching for fallback.
   - `is_resolvable`: true.
-- No TMDbHelper changes required; player JSON to be placed in TMDbHelper user players directory (`special://profile/addon_data/plugin.video.themoviedb.helper/players/`) or shipped in this repo under `integrations/tmdbhelper/players/` for users to copy.
+- User installs JSON into TMDbHelper userdata: `special://profile/addon_data/plugin.video.themoviedb.helper/players/` (not shipped in TMDbHelper repo).
 
 ## Next steps alignment
-- Implement/stabilize non-interactive search usage and ensure search respects `title` param in addon #1 (minimal code touch, backward compatible).
-- Provide the user player JSON file and installation instructions.
-- Add regression-safe resolver/matching logic (title/year; season/episode) and document limitations (no external-id matching).
-- Create test checklist (movies/episodes, ambiguous titles, auth token refresh).
+- Validate listitem metadata for seasons/episodes (should already provide season/episode numbers via `modeling.py`). Fix minimally if any gaps appear in logs.
+- Keep regression-safe: movie flow unchanged; search route remains backward compatible.
+- Test checklist in `docs/tmdbhelper-integration-testing.md` for movies/episodes, localized titles, ambiguous matches, season/episode >1; logs should show search URL, auto-selection, and `setResolvedUrl`.
