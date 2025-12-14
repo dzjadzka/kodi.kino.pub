@@ -33,6 +33,31 @@ content_type_map = {
 
 
 plugin = Plugin()
+_player_json_checked = False
+
+
+def ensure_tmdbhelper_player_installed() -> None:
+    global _player_json_checked
+    if _player_json_checked:
+        return
+    _player_json_checked = True
+    dst_dir = xbmcvfs.translatePath(
+        "special://profile/addon_data/plugin.video.themoviedb.helper/players/"
+    )
+    dst = f"{dst_dir}kino_pub.json"
+    if xbmcvfs.exists(dst):
+        return
+    src = xbmcvfs.translatePath(
+        "special://home/addons/video.kino.pub/integrations/tmdbhelper/players/kino_pub.json"
+    )
+    if not xbmcvfs.exists(src):
+        xbmc.log("[video.kino.pub] TMDbHelper player json source missing", xbmc.LOGWARNING)
+        return
+    ok = xbmcvfs.mkdirs(dst_dir) and xbmcvfs.copy(src, dst)
+    if ok:
+        xbmc.log("[video.kino.pub] Installed TMDbHelper player json into userdata", xbmc.LOGINFO)
+    else:
+        xbmc.log("[video.kino.pub] Failed to install TMDbHelper player json", xbmc.LOGERROR)
 
 
 def render_pagination(pagination: Optional[Dict[str, Any]]) -> None:
@@ -223,6 +248,7 @@ def new_search(content_type: str) -> None:
 
 @plugin.routing.route("/search/<content_type>/")
 def search(content_type: str) -> None:
+    ensure_tmdbhelper_player_installed()
     img = plugin.routing.build_icon_path("search")
     # New search
     li = plugin.list_item(name=localize(32025), iconImage=img, thumbnailImage=img)
@@ -239,6 +265,7 @@ def search(content_type: str) -> None:
 
 @plugin.routing.route("/search/<content_type>/results/")
 def search_results(content_type: str) -> None:
+    ensure_tmdbhelper_player_installed()
     data = {
         "type": None if content_type == "all" else content_type.rstrip("s"),
         **plugin.kwargs,
@@ -290,6 +317,7 @@ def season_episodes(item_id: str, season_number: str) -> None:
 
 @plugin.routing.route("/play/<item_id>")
 def play(item_id: str) -> None:
+    ensure_tmdbhelper_player_installed()
     item = plugin.items.instantiate_from_item_id(item_id)
     si = plugin.kwargs.get("season_index")
     i = plugin.kwargs.get("index")
