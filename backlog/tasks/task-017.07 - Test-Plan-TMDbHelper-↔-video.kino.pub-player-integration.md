@@ -4,6 +4,7 @@ title: 'Test Plan: TMDbHelper ↔ video.kino.pub player integration'
 status: To Do
 assignee: []
 created_date: '2025-12-14 12:45'
+updated_date: '2025-12-14 13:00'
 labels:
   - kodi
   - tmdbhelper
@@ -19,13 +20,13 @@ parent_task_id: task-017
 ## Description
 
 <!-- SECTION:DESCRIPTION:BEGIN -->
-Define test coverage for the integration: unit/integration/manual flows to validate player JSON, resolver route, movie vs episode playback, error handling, and regression on existing kino.pub playback.
+Define test coverage for TMDbHelper ↔ video.kino.pub integration using the agreed contract. Focus on manual cases (movies/episodes) and regressions ensuring existing addon #1 playback is unaffected.
 <!-- SECTION:DESCRIPTION:END -->
 
 ## Acceptance Criteria
 <!-- AC:BEGIN -->
-- [ ] #1 List manual test cases: movie play via TMDbHelper -> kino.pub, episode play with season/episode, no-match handling, auth/token expired handling
-- [ ] #2 Identify any automated test hooks (if feasible) or note if manual-only; include existing kino.pub test harness constraints
-- [ ] #3 Regression checks noted to ensure default kino.pub UI playback unaffected
-- [ ] #4 Test plan captured in task notes and linked to contract doc
+- [ ] #1 Manual test checklist includes: play_movie via TMDbHelper using new player JSON; play_episode with season/episode; no-match/ambiguous title fallback; auth/token expiry handling
+- [ ] #2 Note whether automation is feasible; if not, mark manual-only and reference existing test harness limits
+- [ ] #3 Regression checks listed to ensure default video.kino.pub UI playback and search remain intact
+- [ ] #4 Test plan captured in task notes and linked to doc-001
 <!-- AC:END -->
