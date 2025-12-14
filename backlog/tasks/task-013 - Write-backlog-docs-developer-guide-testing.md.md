@@ -18,9 +18,9 @@ Document testing approach covering pytest harness, podman-based Kodi + mockserve
 
 ## Acceptance Criteria
 <!-- AC:BEGIN -->
-- [ ] #1 backlog/docs/developer-guide/testing.md explains how to run tests with pytest and required env/deps
-- [ ] #2 Describes podman-based Kodi + mockserver setup from tests/conftest.py/helpers.py and how fixtures/expected_results are used
-- [ ] #3 Includes notes on proxy coverage in tests/test_proxy.py and how to extend tests safely
+- [x] #1 backlog/docs/developer-guide/testing.md explains how to run tests with pytest and required env/deps
+- [x] #2 Describes podman-based Kodi + mockserver setup from tests/conftest.py/helpers.py and how fixtures/expected_results are used
+- [x] #3 Includes notes on proxy coverage in tests/test_proxy.py and how to extend tests safely
 <!-- AC:END -->
 
 ## Implementation Notes
