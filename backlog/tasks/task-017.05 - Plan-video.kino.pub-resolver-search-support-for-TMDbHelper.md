@@ -4,6 +4,7 @@ title: 'Plan: video.kino.pub resolver/search support for TMDbHelper'
 status: To Do
 assignee: []
 created_date: '2025-12-14 12:45'
+updated_date: '2025-12-14 13:00'
 labels:
   - kodi
   - player
@@ -17,13 +18,13 @@ parent_task_id: task-017
 ## Description
 
 <!-- SECTION:DESCRIPTION:BEGIN -->
-Outline required changes in video.kino.pub to support TMDbHelper playback: new route(s) to accept external ids/title/year/season/episode, resolve to internal item_id, and redirect to /play. Include API lookup strategy and token/auth considerations.
+Plan concrete changes in video.kino.pub to support TMDbHelper playback without TMDbHelper edits: ensure search route reliably accepts `title` param (non-interactive) and matching for movies/episodes works; add helper route only if needed for robustness. Must remain backward compatible.
 <!-- SECTION:DESCRIPTION:END -->
 
 ## Acceptance Criteria
 <!-- AC:BEGIN -->
-- [ ] #1 Proposed route signatures and parameters documented (e.g., plugin://video.kino.pub/play_resolve?title=...&year=...&season=...&episode=...&imdb=...)
-- [ ] #2 Lookup algorithm defined (search endpoints, matching heuristics, handling multiple results) with references to existing API calls
-- [ ] #3 Error/edge handling described (no match, multiple matches, auth failures), including user messaging plan
-- [ ] #4 Risks noted (lack of external-id support in KinoPub API) with mitigation options or spikes
+- [ ] #1 Identify minimal code changes (if any) in video.kino.pub to guarantee `/search/<type>/results/?title=` works with TMDbHelper (e.g., parameter handling or matching tweaks) with file references
+- [ ] #2 Define matching heuristic (title/year for movies; showname+season+episode for episodes) and confirm 1-based indices; document no external-id support
+- [ ] #3 Outline behavior when multiple matches/none found and what user sees (fallback to search listing)
+- [ ] #4 Produce short implementation notes (files to touch, caution on backward compatibility)
 <!-- AC:END -->
