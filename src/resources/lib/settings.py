@@ -30,17 +30,27 @@ class Settings:
         "watchers": localize(32066),
     }
 
+    def _addon(self) -> xbmcaddon.Addon:
+        # Reuse one Addon wrapper instead of constructing a new one on every
+        # attribute access (settings are read many times per invocation). Stored
+        # directly in __dict__ to bypass the custom __setattr__ below.
+        addon = self.__dict__.get("_addon_instance")
+        if addon is None:
+            addon = xbmcaddon.Addon()
+            self.__dict__["_addon_instance"] = addon
+        return addon
+
     def __getattr__(self, name):
         if name == "advanced":
             return self._get_adv_setting
         if name.startswith("show_"):
-            return eval(xbmcaddon.Addon().getSetting(name).title())
-        return xbmcaddon.Addon().getSetting(name)
+            return self._addon().getSetting(name) == "true"
+        return self._addon().getSetting(name)
 
     def __setattr__(self, name: str, value: str) -> None:
         if value is not None:
             value = str(value)
-        xbmcaddon.Addon().setSetting(name, value)
+        self._addon().setSetting(name, value)
 
     def _get_adv_setting(self, *args):
         try:
@@ -48,7 +58,10 @@ class Settings:
         except (ET.ParseError, OSError):
             return self.defaults.get(args)
         elem = root.find("./{}".format("/".join(args)))
-        return elem.text if elem else self.defaults.get(args)
+        # `if elem` is falsy for a childless element, which every leaf setting is
+        # (e.g. <playcountminimumpercent>90</...>), so it must be `is not None`;
+        # otherwise the user's advancedsettings.xml values are silently ignored.
+        return elem.text if elem is not None else self.defaults.get(args)
 
     @property
     def sorting_direction_title(self) -> str:
@@ -71,3 +84,16 @@ class Settings:
         if self.is_testing:
             return "http://localhost:1080/v1/oauth2/device"
         return "https://api.srvkp.com/oauth2/device"
+
+    @property
+    def oauth_token_url(self) -> str:
+        # The device-code/device-token grants use the /oauth2/device endpoint;
+        # the refresh_token grant uses the /oauth2/token endpoint per the API docs.
+        if self.is_testing:
+            return "http://localhost:1080/v1/oauth2/token"
+        return "https://api.srvkp.com/oauth2/token"
+
+    @property
+    def concurrent_requests(self) -> int:
+        # Worker count for parallel list-data prefetching; at least 1.
+        return max(1, self._addon().getSettingInt("concurrent_requests"))

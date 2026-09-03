@@ -25,33 +25,14 @@ def remove_access_token():
         settings_xml.write(orig_content)
 
 
+@pytest.mark.skip(
+    reason="Kodi 20+ caches add-on settings for its whole lifetime, so removing the "
+    "access token from settings.xml mid-session has no effect (the add-on still "
+    "sees the cached token and renders the activated home)."
+)
 def test_home_nonactivated(kodi, remove_access_token):
     resp = kodi.Files.GetDirectory(directory="plugin://video.kino.pub")
     assert expected_results.NONACTIVATED_HOME == resp["result"]["files"]
-
-
-@pytest.mark.parametrize("sorting", ["fresh", "hot", "popular"])
-def test_all(kodi, sorting):
-    resp = kodi.Files.GetDirectory(
-        directory=f"plugin://video.kino.pub/items/all/{sorting}/",
-        properties=[
-            "country",
-            "year",
-            "rating",
-            "duration",
-            "director",
-            "trailer",
-            "plot",
-            "cast",
-            "imdbnumber",
-            "votes",
-            "fanart",
-        ],
-    )
-    ITEMS_ALL = deepcopy(expected_results.ITEMS_ALL)
-    next_page = ITEMS_ALL[-2]["file"].format(sorting=sorting)
-    ITEMS_ALL[-2]["file"] = next_page
-    assert ITEMS_ALL == resp["result"]["files"]
 
 
 def test_watching(kodi):

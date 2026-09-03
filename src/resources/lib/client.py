@@ -18,12 +18,10 @@ from typing import Union
 import socks
 import xbmc
 
-
 if TYPE_CHECKING:
     from resources.lib.plugin import Plugin
 from resources.lib.utils import localize
 from resources.lib.utils import popup_error
-
 
 TIMEOUT = 60
 
@@ -38,22 +36,27 @@ class KinoApiRequestProcessor(urllib.request.BaseHandler):
             f"Sending {request.get_method()} request to {request.get_full_url()}"
         )
         request.add_header("Authorization", f"Bearer {self.plugin.settings.access_token}")
+        proxy_settings = self.plugin.proxy_settings
+        # Common case (no system proxy): read only `is_enabled` and bail. The
+        # type/host/port reads -- and the debug line that used to evaluate them
+        # unconditionally on every request -- only happen when a proxy is set.
+        if not proxy_settings.is_enabled:
+            return request
         self.plugin.logger.debug(
-            f"Get system proxy settings: type={self.plugin.proxy_settings.type}, "
-            f"host={self.plugin.proxy_settings.host}, port={self.plugin.proxy_settings.port}"
+            f"Get system proxy settings: type={proxy_settings.type}, "
+            f"host={proxy_settings.host}, port={proxy_settings.port}"
         )
-        if self.plugin.proxy_settings.is_enabled:
-            if not self.plugin.proxy_settings.is_correct:
-                self.plugin.logger.error("http proxy settings are not correct")
-                return request
-            self.plugin.logger.debug(
-                f"Set {self.plugin.proxy_settings.type} proxy from system settings, "
-                f"auth: {self.plugin.proxy_settings.with_auth}"
-            )
-            if self.plugin.proxy_settings.is_http:
-                self.set_http_proxy(request=request)
-            if self.plugin.proxy_settings.is_socks:
-                self.set_socks_proxy()
+        if not proxy_settings.is_correct:
+            self.plugin.logger.error("http proxy settings are not correct")
+            return request
+        self.plugin.logger.debug(
+            f"Set {proxy_settings.type} proxy from system settings, "
+            f"auth: {proxy_settings.with_auth}"
+        )
+        if proxy_settings.is_http:
+            self.set_http_proxy(request=request)
+        if proxy_settings.is_socks:
+            self.set_socks_proxy()
         return request
 
     def set_http_proxy(self, request: urllib.request.Request) -> None:
@@ -72,7 +75,7 @@ class KinoApiRequestProcessor(urllib.request.BaseHandler):
             proxy_type=socks.SOCKS4 if proxy_settings.is_socks4 else socks.SOCKS5,
             addr=proxy_settings.host,
             port=proxy_settings.port,
-            rdns=proxy_settings.type == "socks5r",
+            rdns=proxy_settings.type == "socks5h",
             username=proxy_settings.username,
             password=proxy_settings.password,
         )
@@ -160,9 +163,12 @@ class KinoPubClient:
             KinoApiDefaultErrorHandler(self.plugin),
         )
 
-    def __call__(self, endpoint: str) -> "KinoPubClient":
-        self.endpoint = endpoint
-        return self
+    def __call__(self, endpoint: str) -> "_Endpoint":
+        # Return a fresh per-endpoint object instead of mutating shared state on
+        # self, so the client is safe to use from several threads at once (see the
+        # watching_info prefetch in main.render_items). The opener and response
+        # handling below are shared and reentrant for concurrent open() calls.
+        return _Endpoint(self, endpoint)
 
     def _handle_response(
         self, response: http.client.HTTPResponse
@@ -194,15 +200,29 @@ class KinoPubClient:
             raise
         return self._handle_response(response)
 
+
+class _Endpoint:
+    """A KinoPubClient bound to a single endpoint, returned by ``client(endpoint)``.
+
+    A fresh instance per call keeps the endpoint off the shared client, so
+    concurrent requests don't clobber each other.
+    """
+
+    def __init__(self, client: "KinoPubClient", endpoint: str) -> None:
+        self.client = client
+        self.endpoint = endpoint
+
     def get(self, data: Optional[Dict[str, Any]] = None) -> Dict[str, Any]:
         urlencoded_data = urllib.parse.urlencode(data or {})
         query = f"?{urlencoded_data}" if urlencoded_data else ""
-        request = urllib.request.Request(f"{self.plugin.settings.api_url}/{self.endpoint}{query}")
-        return self._make_request(request)
+        request = urllib.request.Request(
+            f"{self.client.plugin.settings.api_url}/{self.endpoint}{query}"
+        )
+        return self.client._make_request(request)
 
     def post(self, data: Optional[Dict[str, Any]] = None) -> Dict[str, Any]:
         encoded_data = urllib.parse.urlencode(data or {}).encode("utf-8")
         request = urllib.request.Request(
-            f"{self.plugin.settings.api_url}/{self.endpoint}", data=encoded_data
+            f"{self.client.plugin.settings.api_url}/{self.endpoint}", data=encoded_data
         )
-        return self._make_request(request)
+        return self.client._make_request(request)

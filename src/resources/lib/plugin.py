@@ -25,9 +25,9 @@ from resources.lib.modeling import TVShow
 from resources.lib.routing import Routing
 from resources.lib.search_history import SearchHistory
 from resources.lib.settings import Settings
+from resources.lib.utils import cached_property
 from resources.lib.utils import localize
 from resources.lib.xbmc_settings import XbmcProxySettings
-
 
 try:
     import inputstreamhelper
@@ -51,7 +51,6 @@ class Plugin:
         self.logger = Logger(self)
         self.routing = Routing(self)
         self.search_history = SearchHistory(self)
-        self.main_menu_items = self._main_menu_items()
         self.items = ItemsCollection(self)
         self.client = KinoPubClient(self)
         self.proxy_settings = XbmcProxySettings(self)
@@ -89,6 +88,13 @@ class Plugin:
     def run(self) -> None:
         self.routing.dispatch(self.path)
 
+    @cached_property
+    def main_menu_items(self) -> List[MainMenuItem]:
+        # Built lazily: only the home screen (index view) renders the menu, but
+        # __init__ runs on every navigation. Each item reads a show_* setting and
+        # builds a URL + icon path, so this is wasted work on play/list/actions.
+        return self._main_menu_items()
+
     def _main_menu_items(self) -> List[MainMenuItem]:
         return [
             MainMenuItem(
@@ -125,27 +131,6 @@ class Plugin:
                 self.routing.build_icon_path("watching_movies"),
                 True,
                 True,
-            ),
-            MainMenuItem(
-                localize(32020),
-                self.routing.build_url("items", "all", "fresh/"),
-                self.routing.build_icon_path("fresh"),
-                True,
-                self.settings.show_last,
-            ),
-            MainMenuItem(
-                localize(32022),
-                self.routing.build_url("items", "all", "popular/"),
-                self.routing.build_icon_path("popular"),
-                True,
-                self.settings.show_popular,
-            ),
-            MainMenuItem(
-                localize(32021),
-                self.routing.build_url("items", "all", "hot/"),
-                self.routing.build_icon_path("hot"),
-                True,
-                self.settings.show_hot,
             ),
             MainMenuItem(
                 self.sorting_title,

@@ -225,11 +225,11 @@ msgid "Movies"
 msgstr "Фильмы"
 
 msgctxt "#32054"
-msgid "TV Series"
+msgid "TV series"
 msgstr "Сериалы"
 
 msgctxt "#32055"
-msgid "TV Show"
+msgid "TV show"
 msgstr "ТВ шоу"
 
 msgctxt "#32056"
@@ -379,3 +379,11 @@ msgstr ""
 msgctxt "#32092"
 msgid "Configure InputStream Adaptive"
 msgstr "Настроить InputStream Adaptive"
+
+msgctxt "#32093"
+msgid "Concurrent requests"
+msgstr "Параллельные запросы"
+
+msgctxt "#32094"
+msgid "How many list items to load in parallel. Higher values load lists faster but may trigger rate limiting."
+msgstr "Сколько элементов списка загружать параллельно. Большие значения ускоряют загрузку, но могут вызвать ограничение частоты запросов."

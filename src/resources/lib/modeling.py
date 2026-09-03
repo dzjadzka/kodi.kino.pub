@@ -1,7 +1,7 @@
 import sys
-import typing
 import urllib
 from collections import namedtuple
+from concurrent.futures import ThreadPoolExecutor
 from typing import Any
 from typing import cast
 from typing import ClassVar
@@ -21,7 +21,6 @@ from resources.lib.utils import cached_property, natural_sort
 from resources.lib.utils import localize
 from resources.lib.utils import popup_warning
 
-
 try:
     import inputstreamhelper
 except ImportError:
@@ -29,6 +28,14 @@ except ImportError:
 
 
 Response = namedtuple("Response", ["items", "pagination"])
+
+# kino.pub genre id for anime, filtered out when the user enables "exclude anime".
+ANIME_GENRE_ID = 25
+
+# The add-on streams only HLS through inputstream.adaptive (the stream_type
+# options hls/hls2/hls4 are all HLS variants), so ISA is always given the
+# canonical HLS mime type to detect the manifest from.
+HLS_MIME_TYPE = "application/vnd.apple.mpegurl"
 
 
 class ItemsCollection:
@@ -48,11 +55,18 @@ class ItemsCollection:
 
     @property
     def watching_movies(self) -> List["Movie"]:
-        movies = []
-        for item_data in self.plugin.client("watching/movies").get()["items"]:
-            movie = cast(Movie, self.instantiate_from_item_id(item_data["id"]))
-            movies.append(movie)
-        return movies
+        # watching/movies returns only ids + minimal metadata, so each movie needs
+        # its own full items/{id} response. Fetch them concurrently rather than in
+        # a blocking loop (executor.map preserves order). KinoPubClient is
+        # thread-safe and the proxy/addon settings are warmed by the call below.
+        response = self.plugin.client("watching/movies").get()
+        item_ids = [item_data["id"] for item_data in response["items"]]
+        if not item_ids:
+            return []
+        workers = min(self.plugin.settings.concurrent_requests, len(item_ids))
+        with ThreadPoolExecutor(max_workers=workers) as executor:
+            movies = list(executor.map(self.instantiate_from_item_id, item_ids))
+        return cast(List["Movie"], movies)
 
     @property
     def watching_tvshows(self) -> List["TVShow"]:
@@ -98,52 +112,54 @@ class ItemsCollection:
         else:
             return cast(Movie, item)
 
-    @typing.no_type_check
-    def _get_anime_excluded(
-        self, endpoint: str, data: Dict, collection: Optional[Dict[str, List[Dict]]] = None
-    ) -> Dict[str, List[Dict]]:
-        # init items collection
-        collection = collection or {"items": []}
+    @staticmethod
+    def _is_anime(item: Dict[str, Any]) -> bool:
+        return any(genre["id"] == ANIME_GENRE_ID for genre in item["genres"])
 
-        # exclude start_from from request data
+    def _get_anime_excluded(self, endpoint: str, data: Dict[str, Any]) -> Dict[str, Any]:
+        """Fetch one screen's worth of items with anime removed.
+
+        Dropping anime from an API page leaves fewer than ``perpage`` items, so
+        keep pulling subsequent API pages until a full screen is collected (or the
+        pages run out). When a page overshoots, the surplus is carried to the next
+        screen by rewinding the pagination cursor -- ``current`` back one and
+        ``start_from`` past the last item shown -- which render_pagination replays
+        on the next request.
+        """
+        data = dict(data)  # don't mutate the caller's query params
         start_from = int(data.pop("start_from", 0))
+        items: List[Dict[str, Any]] = []
+        pagination: Dict[str, Any] = {}
 
-        resp = self.plugin.client(endpoint).get(data=data)
+        while True:
+            response = self.plugin.client(endpoint).get(data=data)
+            api_items = response["items"]
+            pagination = response["pagination"]
+            page_size = int(pagination["perpage"])
+            non_anime = [item for item in api_items[start_from:] if not self._is_anime(item)]
 
-        new_items = resp["items"]
-        pagination = resp["pagination"]
-        page_size = int(pagination["perpage"])
-        collection["pagination"] = pagination
+            # Enough to fill the screen: keep only what's needed and rewind the
+            # cursor so the leftovers show up on the next screen.
+            if len(items) + len(non_anime) >= page_size:
+                needed = page_size - len(items)
+                items.extend(non_anime[:needed])
+                last_item_id = non_anime[needed - 1]["id"]
+                last_index = next(
+                    index for index, item in enumerate(api_items) if item["id"] == last_item_id
+                )
+                pagination["current"] = int(pagination["current"]) - 1
+                pagination["start_from"] = last_index + 1
+                break
 
-        # filter items list from anime items
-        non_anime_items = list(
-            x for x in new_items[start_from:] if all(i["id"] != 25 for i in x["genres"])
-        )
+            # Not enough yet: take everything and advance to the next API page,
+            # if there is one.
+            items.extend(non_anime)
+            if int(pagination["current"]) + 1 >= int(pagination["total"]):
+                break
+            data["page"] = int(pagination["current"]) + 1
+            start_from = 0
 
-        # if not enough items continue with next API page
-        if len(non_anime_items) + len(collection["items"]) < page_size:
-            collection["items"].extend(non_anime_items)
-
-            if int(pagination["current"]) + 1 < int(pagination["total"]):
-                data.update({"page": pagination["current"] + 1, "start_from": 0})
-                collection = self._get_anime_excluded(endpoint, data, collection)
-        else:
-            # exclude extra items from filtered items
-            count_items_to_extend = page_size - len(collection["items"])
-            items = non_anime_items[:count_items_to_extend]
-            last_item_id = items[-1]["id"]
-            last_item_index = next(
-                (index for (index, d) in enumerate(new_items) if d["id"] == last_item_id), None
-            )
-            collection["items"].extend(items)
-            collection["pagination"]["current"] = (
-                pagination["current"] - 1
-            )  # start from current API page
-            collection["pagination"]["start_from"] = (
-                last_item_index + 1
-            )  # do not include last item to next page
-
-        return collection
+        return {"items": items, "pagination": pagination}
 
 
 class ItemEntity:
@@ -294,20 +310,21 @@ class PlayableItem(ItemEntity):
             return 0
         return self.watching_info["time"]
 
-    @property
-    def hls_properties(self) -> Dict[str, str]:
-        if self.plugin.is_hls_enabled:
-            helper = inputstreamhelper.Helper("hls")
-            if not helper.check_inputstream():
-                # HLS stream is not supported
-                popup_warning(localize(32044))
-                return {}
-            else:
-                return {
-                    "inputstream": helper.inputstream_addon,
-                    "inputstream.adaptive.manifest_type": "hls",
-                }
-        return {}
+    def _setup_inputstream(self, li: ExtendedListItem) -> None:
+        if not self.plugin.is_hls_enabled:
+            return
+        helper = inputstreamhelper.Helper("hls")
+        if not helper.check_inputstream():
+            # HLS stream is not supported
+            popup_warning(localize(32044))
+            return
+        li.setProperty("inputstream", helper.inputstream_addon)
+        # inputstream.adaptive detects the manifest from the mime type. The old
+        # inputstream.adaptive.manifest_type property was deprecated on Kodi 21
+        # and removed on Kodi 22, so set the HLS mime type instead.
+        # setContentLookup(False) skips Kodi's redundant HTTP HEAD request.
+        li.setMimeType(HLS_MIME_TYPE)
+        li.setContentLookup(False)
 
     @property
     def playable_list_item(self) -> ExtendedListItem:
@@ -318,9 +335,8 @@ class PlayableItem(ItemEntity):
             "playcount": self.video_info["playcount"],
             "imdbnumber": self.video_info["imdbnumber"],
             **self.properties,
-            **self.hls_properties,
         }
-        return self.plugin.list_item(
+        li = self.plugin.list_item(
             name=getattr(self, "li_title", self.title),
             path=self.media_url,
             properties=properties,
@@ -329,6 +345,8 @@ class PlayableItem(ItemEntity):
             poster=self.item.get("posters", {}).get("big"),
             subtitles=[subtitle.get("url") for subtitle in self.video_data["subtitles"]],
         )
+        self._setup_inputstream(li)
+        return li
 
 
 class TVShow(ItemEntity):
@@ -514,6 +532,18 @@ class Movie(PlayableItem):
 
     @cached_property
     def watching_info(self) -> Dict:
+        # A full items/{id} response embeds the per-user watch state in its video
+        # entry, so reuse it instead of an extra "watching" request (the
+        # "I'm watching" screen already fetched items/{id} per movie). List
+        # endpoints omit it, so fall back to the API call when it's absent.
+        videos = self.item.get("videos")
+        if videos and "watching" in videos[0]:
+            video = videos[0]
+            return {
+                "time": video["watching"]["time"],
+                "status": video["watching"]["status"],
+                "duration": video["duration"],
+            }
         return self.plugin.client("watching").get(data={"id": self.item_id})["item"]["videos"][0]
 
 
